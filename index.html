@@ -7,511 +7,417 @@
 <meta name="description" content="Poster and expanded description of an AI pipeline that extracts structured lifespan data from scientific articles for the Open Genes database.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f5fa;
-    --surface: #ffffff;
-    --ink: #161a33;
-    --muted: #5a5f7a;
-    --line: #e3e4ef;
+    --ink: #1e1f2e;
+    --text: #34364a;
+    --muted: #6a6c80;
+    --line: #dfe1ef;
+    --paper: #ffffff;
+    --panel: #eef0fb;
     --indigo: #5b5fd6;
-    --indigo-deep: #4446b8;
-    --indigo-soft: #ebebfb;
-    --ai: #e98a2e;
-    --ai-soft: #fde6cc;
-    --ai-ink: #7a3f05;
-    --code: #6b6fe0;
-    --code-soft: #e7e8fc;
-    --code-ink: #2d2f8f;
-    --io-soft: #f0f1f5;
-    --io-ink: #3a3d4f;
-    --ok: #1f8a5b;
-    --radius: 14px;
-    --shadow: 0 1px 2px rgba(22, 26, 51, .05), 0 8px 24px rgba(22, 26, 51, .06);
+    --indigo-band: #7474d4;
+    --orange: #f26b2a;
+    --ai-fill: #fde6cd;
+    --ai-line: #f3a865;
+    --ai-pill: #f57f3a;
+    --py-fill: #eff0fc;
+    --py-line: #8d8fe3;
+    --py-pill: #7476d9;
+    --io-fill: #f5f5f7;
+    --io-line: #a3a5b3;
+    --gutter: 20px;
   }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font: 16px/1.6 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: var(--indigo); }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
-  .muted { color: var(--muted); }
-  code { font: 500 .88em ui-monospace, "SFMono-Regular", Consolas, monospace; background: var(--indigo-soft); color: var(--code-ink); padding: 1px 6px; border-radius: 6px; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--paper); color: var(--text); font: 17px/1.55 Roboto, Arial, sans-serif; }
+  a { color: var(--indigo); text-underline-offset: 2px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 var(--gutter); }
+  code { font: 500 .84em "Roboto Mono", Consolas, monospace; color: var(--indigo); }
+  h1, h2, h3, h4 { color: var(--ink); }
 
-  /* Navigation */
-  nav.top {
-    position: sticky; top: 0; z-index: 10;
-    background: rgba(245, 245, 250, .86); backdrop-filter: saturate(1.4) blur(10px);
-    border-bottom: 1px solid var(--line);
-  }
-  nav.top .wrap { display: flex; align-items: center; gap: 24px; height: 56px; }
-  nav.top .brand { font-weight: 800; letter-spacing: -.01em; color: var(--ink); text-decoration: none; white-space: nowrap; }
-  nav.top .brand span { color: var(--indigo); }
-  nav.top ul { display: flex; gap: 18px; list-style: none; margin: 0 0 0 auto; padding: 0; overflow-x: auto; scrollbar-width: none; }
+  /* Top strip and nav, as the poster's indigo top border */
+  .strip { height: 6px; background: var(--indigo-band); }
+  nav.top { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, .94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  nav.top .wrap { display: flex; align-items: center; gap: 20px; height: 52px; }
+  nav.top .brand { font-weight: 700; color: var(--ink); text-decoration: none; white-space: nowrap; font-size: .95rem; }
+  nav.top ul { display: flex; gap: 20px; list-style: none; margin: 0 0 0 auto; padding: 0; overflow-x: auto; scrollbar-width: none; }
   nav.top ul::-webkit-scrollbar { display: none; }
-  nav.top a.l { color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 500; white-space: nowrap; }
-  nav.top a.l:hover { color: var(--indigo); }
+  nav.top ul a { color: var(--muted); text-decoration: none; font-size: .9rem; white-space: nowrap; }
+  nav.top ul a:hover { color: var(--indigo); }
 
-  /* Hero */
-  .hero { padding: 64px 0 40px; }
-  .kicker { display: inline-flex; align-items: center; gap: 8px; font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--indigo); background: var(--indigo-soft); padding: 6px 12px; border-radius: 99px; }
-  .hero h1 { font-size: clamp(2rem, 5.2vw, 3.4rem); line-height: 1.08; letter-spacing: -.025em; margin: 18px 0 18px; max-width: 900px; }
-  .hero h1 em { font-style: normal; background: linear-gradient(90deg, var(--indigo), #8a6be0); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .authors { font-weight: 600; margin: 0; }
-  .affil { margin: 4px 0 0; font-size: .92rem; }
-  .lead { font-size: 1.12rem; max-width: 780px; margin: 26px 0 0; color: #33385a; }
-  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: .95rem; transition: transform .15s ease, box-shadow .15s ease; }
-  .btn:hover { transform: translateY(-1px); }
-  .btn.primary { background: var(--indigo); color: #fff; box-shadow: 0 6px 18px rgba(91, 95, 214, .3); }
-  .btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 44px; }
-  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); }
-  .stat b { display: block; font-size: 1.9rem; letter-spacing: -.02em; color: var(--indigo-deep); line-height: 1.1; }
-  .stat span { font-size: .86rem; color: var(--muted); }
+  /* Header, as the poster's */
+  header.head { padding-top: 48px; padding-bottom: 28px; }
+  header.head h1 { font-weight: 700; font-size: clamp(2rem, 5.4vw, 3.5rem); line-height: 1.08; letter-spacing: -.015em; margin: 0 0 18px; }
+  .authors { font-size: 1.1rem; margin: 0; color: var(--ink); }
+  .affil { margin: 4px 0 0; color: var(--muted); font-size: .95rem; }
+
+  .og { margin-top: 30px; background: var(--panel); border-radius: 14px; padding: 26px 28px; display: grid; grid-template-columns: 1.2fr 2fr; gap: 28px; align-items: center; }
+  .og h2 { font-size: 1.7rem; color: var(--indigo); margin: 0 0 6px; }
+  .og p { margin: 0; }
+  .og .tag { margin-top: 14px; font-weight: 700; color: var(--indigo); }
+  .nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .nums b { display: block; font-weight: 700; font-size: clamp(1.7rem, 3.6vw, 2.5rem); line-height: 1; color: var(--indigo); letter-spacing: -.01em; }
+  .nums span { display: block; margin-top: 6px; font-size: .88rem; color: var(--text); line-height: 1.35; }
 
   /* Sections */
-  section { padding: 56px 0; }
-  .sec-head { margin-bottom: 28px; max-width: 820px; }
-  .eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--indigo); }
-  h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); letter-spacing: -.02em; line-height: 1.15; margin: 6px 0 10px; }
-  h3 { font-size: 1.15rem; letter-spacing: -.01em; margin: 0 0 8px; }
-  h4 { font-size: .98rem; margin: 0 0 6px; }
-  .band { background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  section { padding: 52px 0; }
+  section.tint { background: #f8f8fd; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .h { display: flex; gap: 12px; align-items: baseline; margin: 0 0 8px; font-size: clamp(1.5rem, 3.2vw, 2rem); font-weight: 700; line-height: 1.2; }
+  .h .n { color: var(--indigo); }
+  .intro { max-width: 760px; margin: 0 0 26px; color: var(--muted); }
+  h3 { font-size: 1.2rem; margin: 0 0 8px; }
+  h4 { font-size: 1rem; margin: 0 0 4px; }
+  .sub { margin-top: 40px; }
+  .sub > h3 { color: var(--indigo); font-size: 1.25rem; }
+  .sub > p.lead { max-width: 760px; margin: 0 0 18px; }
 
   /* Poster */
-  .poster-frame { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); }
-  .poster-frame img { display: block; width: 100%; height: auto; border-radius: 8px; }
-  .poster-missing { display: grid; place-items: center; text-align: center; aspect-ratio: 3 / 4; max-height: 80vh; margin: 0 auto; border: 2px dashed var(--line); border-radius: 10px; color: var(--muted); padding: 24px; }
-  .poster-note { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: .9rem; }
+  .poster { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+  .poster img { display: block; width: 100%; height: auto; }
+  .poster-missing { display: grid; place-items: center; aspect-ratio: 3 / 4; max-height: 78vh; margin: 0 auto; color: var(--muted); background: var(--panel); padding: 24px; text-align: center; }
+  .poster-links { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 12px; font-size: .92rem; }
 
-  /* Legend chips */
-  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 22px; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; }
-  .chip.ai { background: var(--ai-soft); color: var(--ai-ink); }
-  .chip.code { background: var(--code-soft); color: var(--code-ink); }
-  .chip.io { background: var(--io-soft); color: var(--io-ink); }
-  .chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .7; }
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 16px; font-size: .92rem; }
+  .legend span::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 8px; vertical-align: -2px; border: 1.5px solid; }
+  .legend .ai::before { background: var(--ai-fill); border-color: var(--ai-line); }
+  .legend .py::before { background: var(--py-fill); border-color: var(--py-line); }
+  .legend .io::before { background: var(--io-fill); border-color: var(--io-line); }
 
-  /* Stage flow */
-  .stages { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; counter-reset: st; }
-  .stage { position: relative; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--io-ink); border-radius: var(--radius); padding: 18px 16px; box-shadow: var(--shadow); }
-  .stage.ai { border-top-color: var(--ai); }
-  .stage.code { border-top-color: var(--code); }
-  .stage .n { font-size: .75rem; font-weight: 700; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
-  .stage h3 { margin-top: 4px; font-size: 1.05rem; }
-  .stage ul { margin: 8px 0 0; padding-left: 18px; font-size: .9rem; color: #3b405f; }
-  .stage li { margin: 4px 0; }
-  .stage:not(:last-child)::after { content: "→"; position: absolute; right: -13px; top: 42%; color: #a3a6c2; font-weight: 700; }
+  /* Pipeline rows, as on the poster */
+  .flow { display: grid; gap: 8px; }
+  .row { display: grid; grid-template-columns: 1fr 170px; gap: 16px; align-items: center; }
+  .box { border: 1.5px solid var(--io-line); background: var(--io-fill); border-radius: 8px; padding: 10px 14px; }
+  .box.ai { background: var(--ai-fill); border-color: var(--ai-line); }
+  .box.py { background: var(--py-fill); border-color: var(--py-line); }
+  .box h4 { font-size: 1rem; margin: 0; }
+  .box p { margin: 2px 0 0; font-size: .92rem; }
+  .pill { text-align: center; border-radius: 99px; padding: 6px 10px; font-weight: 700; font-size: .9rem; border: 1.5px solid var(--io-line); color: var(--ink); background: #fff; }
+  .pill.ai { background: var(--ai-pill); border-color: var(--ai-pill); color: #fff; }
+  .pill.py { background: var(--py-pill); border-color: var(--py-pill); color: #fff; }
 
-  /* Cards and grids */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
-  .card p { margin: 0 0 10px; }
-  .card ul { margin: 6px 0 0; padding-left: 18px; }
-  .card li { margin: 5px 0; }
-  .card.tint-ai { background: linear-gradient(180deg, #fff8f0, #fff); border-color: #f7dcbd; }
-  .card.tint-code { background: linear-gradient(180deg, #f6f6ff, #fff); border-color: #dcdcf6; }
+  .notes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 26px; }
+  .note { border-top: 3px solid var(--indigo); padding-top: 12px; }
+  .note h4 { color: var(--indigo); }
+  .note p { margin: 0; font-size: .95rem; }
 
-  /* Subpipeline blocks */
-  .sub { padding: 44px 0; border-top: 1px solid var(--line); }
-  .sub:first-of-type { border-top: 0; padding-top: 8px; }
-  .sub-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
-  .sub-head .num { font-size: .8rem; font-weight: 800; color: #fff; background: var(--indigo); border-radius: 8px; padding: 3px 9px; }
-  .sub-head h3 { font-size: 1.45rem; margin: 0; }
-  .purpose { max-width: 820px; margin: 0 0 22px; color: #33385a; }
-
-  /* Lanes (supplementary reader) */
-  .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .lane { background: var(--code-soft); border-radius: var(--radius); padding: 18px; }
-  .lane h4 { color: var(--code-ink); }
-  .lane .fmt { font-size: .75rem; font-weight: 600; color: var(--code-ink); opacity: .75; margin-bottom: 10px; }
-  .lane ol, .lane ul { margin: 0; padding-left: 18px; font-size: .9rem; color: #2f3266; }
-  .lane li { margin: 5px 0; }
-  .merge-arrow { text-align: center; color: #a3a6c2; font-weight: 700; margin: 10px 0; letter-spacing: .3em; }
-  .deliver { background: var(--io-soft); border-radius: var(--radius); padding: 16px 18px; text-align: center; font-weight: 600; color: var(--io-ink); }
-
-  /* Validation callouts */
-  .proof { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
-  .proof div { border-left: 3px solid var(--ok); background: var(--surface); border-radius: 0 10px 10px 0; padding: 12px 14px; font-size: .9rem; box-shadow: var(--shadow); }
-  .proof code { font-size: .8rem; }
-
-  /* Calls (Gemini) */
-  .calls { display: grid; gap: 14px; }
-  .call { display: grid; grid-template-columns: 1.1fr auto .9fr auto 1.2fr; align-items: stretch; gap: 10px; }
-  .call .box { border-radius: 12px; padding: 14px 16px; font-size: .9rem; }
-  .call .in { background: var(--io-soft); color: var(--io-ink); }
-  .call .model { background: var(--ai-soft); color: var(--ai-ink); }
-  .call .out { background: var(--io-soft); color: var(--io-ink); }
-  .call .box b { display: block; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; opacity: .8; }
-  .call .ar { align-self: center; color: #a3a6c2; font-weight: 700; }
-  .call-title { font-weight: 700; margin: 6px 0 2px; }
-  .call-title span { color: var(--muted); font-weight: 500; }
-
-  /* Curve reading */
-  .curve-wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 22px; align-items: start; }
-  .curve-svg { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
-  .curve-svg svg { width: 100%; height: auto; display: block; }
-  .blocks { display: grid; gap: 12px; }
-  .block { display: grid; grid-template-columns: 34px 1fr; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
-  .block .b { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: .9rem; }
-  .block.code .b { background: var(--code-soft); color: var(--code-ink); }
-  .block.ai .b { background: var(--ai-soft); color: var(--ai-ink); }
-  .block h4 { margin: 2px 0 4px; }
-  .block p { margin: 0; font-size: .9rem; color: #3b405f; }
-  .metric-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
-  .metric { background: var(--indigo-soft); border-radius: 12px; padding: 14px 16px; }
-  .metric b { font-size: 1.5rem; color: var(--indigo-deep); display: block; line-height: 1.1; }
-  .metric span { font-size: .85rem; color: #3b3f7a; }
-
-  /* Consolidation steps */
-  .steps { counter-reset: s; display: grid; gap: 12px; }
-  .step { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-  .step::before { content: counter(s); width: 44px; height: 44px; border-radius: 12px; background: var(--code-soft); color: var(--code-ink); display: grid; place-items: center; font-weight: 800; font-size: 1.1rem; }
-  .step h4 { margin: 2px 0 4px; }
-  .step p, .step ul { margin: 0; font-size: .92rem; color: #3b405f; }
-  .step ul { padding-left: 18px; margin-top: 4px; }
-  .priority { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
-  .priority span { background: var(--indigo-soft); color: var(--code-ink); font-weight: 600; font-size: .82rem; padding: 4px 10px; border-radius: 8px; }
-  .priority i { font-style: normal; color: #a3a6c2; font-weight: 700; }
+  /* Record */
+  .fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 26px; margin: 0 0 22px; padding: 0; list-style: none; }
+  .fields li { font-size: .95rem; padding-left: 14px; border-left: 3px solid var(--py-line); }
+  .fields b { display: block; color: var(--ink); }
 
   /* Tables */
-  .table-scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
-  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { font-size: .74rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); background: #fafafe; font-weight: 700; }
-  tr:last-child td { border-bottom: 0; }
-  td.q { color: #3b405f; font-style: italic; }
-  .ok { color: var(--ok); font-weight: 700; }
-  .pill { display: inline-block; font-size: .74rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: #e2f4ea; color: var(--ok); white-space: nowrap; }
+  .tbl { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+  thead th { background: var(--indigo); color: #fff; text-align: left; font-weight: 500; padding: 8px 12px; white-space: nowrap; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(odd) td { background: #f8f8fd; }
+  td.q { font-style: italic; }
+  .small { font-size: .86rem; color: var(--muted); margin-top: 10px; }
 
-  /* Record anatomy */
-  .anatomy { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 22px; }
-  .anatomy div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-size: .9rem; }
-  .anatomy b { display: block; margin-bottom: 2px; }
+  /* Supplementary lanes */
+  .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .lane { background: var(--py-fill); border: 1.5px solid var(--py-line); border-radius: 10px; padding: 16px; }
+  .lane .fmt { font-size: .82rem; color: var(--muted); margin: 0 0 8px; }
+  .lane ol, .lane ul { margin: 0; padding-left: 18px; font-size: .93rem; }
+  .lane li { margin: 4px 0; }
+  .into { margin-top: 12px; background: var(--io-fill); border: 1.5px solid var(--io-line); border-radius: 10px; padding: 12px 16px; font-size: .95rem; }
+  .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+  .checks div { font-size: .93rem; padding-left: 12px; border-left: 3px solid var(--orange); }
+
+  /* Gemini calls */
+  .call { border: 1.5px solid var(--ai-line); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+  .call > h4 { background: var(--ai-fill); margin: 0; padding: 9px 14px; font-size: 1rem; }
+  .call > h4 span { font-weight: 400; color: var(--muted); }
+  .call .cols { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  .call .cols div { padding: 12px 14px; font-size: .93rem; }
+  .call .cols div + div { border-left: 1px solid var(--line); }
+  .call .cols b { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 3px; }
+
+  /* Curves */
+  .curve { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+  .curve svg { width: 100%; height: auto; display: block; }
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 26px 1fr; gap: 8px; margin: 0 0 12px; font-size: .95rem; }
+  .steps li::before { content: counter(s); color: var(--orange); font-weight: 700; }
+  .steps b { color: var(--ink); }
+  .callout { margin-top: 18px; background: var(--ai-fill); border-radius: 10px; padding: 14px 16px; }
+  .callout b { color: var(--ink); display: block; font-size: 1.05rem; }
+
+  /* Consolidation */
+  .cons { list-style: none; margin: 0; padding: 0; counter-reset: c; display: grid; gap: 10px; }
+  .cons li { counter-increment: c; display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .cons li::before { content: counter(c); width: 30px; height: 30px; border-radius: 50%; background: var(--py-pill); color: #fff; font-weight: 700; display: grid; place-items: center; font-size: .9rem; }
+  .cons p, .cons ul { margin: 0; font-size: .95rem; }
+  .cons ul { padding-left: 18px; margin-top: 4px; }
+  .prio { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 8px; font-size: .9rem; font-weight: 500; }
+  .prio span { background: var(--py-fill); border: 1.5px solid var(--py-line); border-radius: 6px; padding: 2px 9px; }
 
   /* Validation loop */
-  .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-  .loop .node { position: relative; border-radius: 14px; padding: 16px; font-size: .9rem; }
-  .loop .node h4 { margin-bottom: 6px; }
-  .loop .node.io { background: var(--io-soft); color: var(--io-ink); }
-  .loop .node.code { background: var(--code-soft); color: var(--code-ink); }
-  .loop .node:not(:last-child)::after { content: "→"; position: absolute; right: -12px; top: 42%; color: #a3a6c2; font-weight: 700; }
-  .loop-back { text-align: center; font-size: .85rem; color: var(--muted); margin-top: 12px; }
-  .diag { counter-reset: d; list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
-  .diag li { counter-increment: d; display: grid; grid-template-columns: 28px 1fr; gap: 10px; font-size: .92rem; }
-  .diag li::before { content: counter(d); width: 28px; height: 28px; border-radius: 8px; background: var(--indigo-soft); color: var(--indigo-deep); font-weight: 700; display: grid; place-items: center; font-size: .82rem; }
+  .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; counter-reset: l; }
+  .loop div { position: relative; border-radius: 10px; padding: 14px; font-size: .92rem; border: 1.5px solid var(--io-line); background: var(--io-fill); }
+  .loop div.py { border-color: var(--py-line); background: var(--py-fill); }
+  .loop h4 { font-size: .98rem; }
+  .loop-back { margin: 10px 0 0; font-size: .9rem; color: var(--muted); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 34px; }
+  .two ul, .two ol { margin: 0; padding-left: 20px; }
+  .two li { margin: 6px 0; font-size: .95rem; }
 
-  /* Technology stack */
-  .stack { display: grid; gap: 10px; }
-  .layer { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
-  .layer .name { font-weight: 700; font-size: .95rem; }
-  .layer .name small { display: block; font-weight: 500; color: var(--muted); font-size: .8rem; }
-  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tag { font-size: .82rem; padding: 5px 10px; border-radius: 8px; background: var(--io-soft); color: var(--io-ink); font-weight: 500; }
-  .tag.ai { background: var(--ai-soft); color: var(--ai-ink); }
-  .tag.ext { outline: 1.5px dashed var(--ai); outline-offset: -1.5px; }
-  .tag.code { background: var(--code-soft); color: var(--code-ink); }
+  /* Technology */
+  .stack { display: grid; gap: 0; }
+  .layer { display: grid; grid-template-columns: 190px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .layer > b { color: var(--ink); }
+  .layer > b small { display: block; font-weight: 400; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+  .chips span { font-size: .88rem; padding: 3px 10px; border-radius: 6px; background: var(--io-fill); border: 1px solid var(--line); }
+  .chips span.ai { background: var(--ai-fill); border-color: var(--ai-line); }
+  .chips span.ext { border-style: dashed; border-width: 1.5px; }
 
   /* References */
-  .refs { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
-  .ref-main { background: linear-gradient(135deg, var(--indigo), #7d63db); color: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 12px 30px rgba(91, 95, 214, .28); }
-  .ref-main .eyebrow { color: #dcdcff; }
-  .ref-main h3 { font-size: 1.6rem; margin: 6px 0 10px; }
-  .ref-main p { color: #ecebff; margin: 0 0 14px; }
-  .ref-main a.btn { background: #fff; color: var(--indigo-deep); }
-  .cite { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px; box-shadow: var(--shadow); }
-  .cite p { margin: 0 0 12px; font-size: .95rem; }
-  .cite .doi { font-weight: 600; word-break: break-all; }
-  .orgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
-  .org { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; text-decoration: none; color: var(--ink); transition: border-color .15s ease, transform .15s ease; }
-  .org:hover { border-color: var(--indigo); transform: translateY(-1px); }
-  .org b { display: block; }
-  .org span { font-size: .88rem; color: var(--muted); }
-  .org em { display: block; font-style: normal; font-size: .82rem; color: var(--indigo); margin-top: 6px; font-weight: 600; }
+  .refs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .ref { background: var(--panel); border-radius: 14px; padding: 22px 24px; }
+  .ref h3 { color: var(--indigo); font-size: 1.4rem; margin: 0 0 8px; }
+  .ref p { margin: 0 0 10px; }
+  .cite { font-size: .98rem; }
+  .orgs { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 22px; font-size: .95rem; }
+  .orgs a { font-weight: 500; }
 
-  footer { padding: 36px 0 56px; color: var(--muted); font-size: .88rem; border-top: 1px solid var(--line); }
-  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+  footer { margin-top: 8px; }
+  footer .wrap { padding-top: 22px; padding-bottom: 40px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .88rem; }
 
-  @media (max-width: 960px) {
-    .stages, .loop { grid-template-columns: 1fr 1fr; }
-    .stage::after, .loop .node::after { display: none; }
-    .curve-wrap, .refs { grid-template-columns: 1fr; }
-    .call { grid-template-columns: 1fr; }
-    .call .ar { transform: rotate(90deg); justify-self: center; }
+  @media (max-width: 900px) {
+    .og { grid-template-columns: 1fr; gap: 20px; }
+    .curve, .refs, .two { grid-template-columns: 1fr; }
+    .loop { grid-template-columns: 1fr 1fr; }
+    .notes, .lanes, .checks, .fields { grid-template-columns: 1fr 1fr; }
   }
-  @media (max-width: 720px) {
-    .stats { grid-template-columns: 1fr 1fr; }
-    .stages, .loop, .grid-2, .grid-3, .lanes, .proof, .anatomy, .orgs { grid-template-columns: 1fr; }
-    .layer { grid-template-columns: 1fr; gap: 8px; }
+  @media (max-width: 640px) {
+    :root { --gutter: 22px; }
+    body { font-size: 16px; }
+    header.head { padding-top: 30px; padding-bottom: 16px; }
+    .authors { font-size: 1rem; }
+    .og { padding: 20px; border-radius: 12px; }
+    .nums { grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+    section { padding: 38px 0; }
+    .row { grid-template-columns: 1fr; gap: 4px; }
+    .pill { justify-self: start; padding: 3px 12px; font-size: .82rem; }
+    .flow { gap: 12px; }
+    .notes, .lanes, .checks, .fields, .loop { grid-template-columns: 1fr; }
+    .call .cols { grid-template-columns: 1fr; }
+    .call .cols div + div { border-left: 0; border-top: 1px solid var(--line); }
+    .layer { grid-template-columns: 1fr; gap: 6px; }
     nav.top .brand { display: none; }
     nav.top ul { margin-left: 0; }
-    .hero { padding-top: 40px; }
+    /* Tables become one card per row, each cell labelled with its column name */
+    table, tbody, tr, td { display: block; width: 100%; }
+    thead { display: none; }
+    tbody tr { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; background: #fff; }
+    tbody tr:nth-child(odd) td { background: transparent; }
+    td { border: 0; padding: 3px 0; font-size: .93rem; }
+    td::before { content: attr(data-label); display: block; font-style: normal; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    td:first-child { font-weight: 700; color: var(--ink); }
+    td:first-child::before { display: none; }
   }
 </style>
 </head>
 <body>
-
+<div class="strip"></div>
 <nav class="top">
   <div class="wrap">
-    <a class="brand" href="#top">Open Genes <span>· AI extraction</span></a>
+    <a class="brand" href="#top">AI extraction · Open Genes</a>
     <ul>
-      <li><a class="l" href="#poster">Poster</a></li>
-      <li><a class="l" href="#record">Record</a></li>
-      <li><a class="l" href="#pipeline">Pipeline</a></li>
-      <li><a class="l" href="#subpipelines">Subpipelines</a></li>
-      <li><a class="l" href="#validation">Validation</a></li>
-      <li><a class="l" href="#technology">Technology</a></li>
-      <li><a class="l" href="#references">References</a></li>
+      <li><a href="#poster">Poster</a></li>
+      <li><a href="#pipeline">Pipeline</a></li>
+      <li><a href="#subpipelines">Subpipelines</a></li>
+      <li><a href="#validation">Validation</a></li>
+      <li><a href="#technology">Technology</a></li>
+      <li><a href="#references">References</a></li>
     </ul>
   </div>
 </nav>
 
-<header class="hero wrap" id="top">
-  <span class="kicker">Poster · 2026</span>
-  <h1>AI-Based Extraction of Structured <em>Lifespan Data</em> from Scientific Literature</h1>
+<header class="head wrap" id="top">
+  <h1>AI-Based Extraction of Structured Lifespan Data from Scientific Literature</h1>
   <p class="authors">Rafikova E<sup>1,2</sup>, Orden PD<sup>2</sup>, Nemirovich-Danchenko N<sup>2</sup>, Duhart JM<sup>1</sup>, Buslje CM<sup>1</sup>, Ceriani MF<sup>1</sup></p>
-  <p class="affil muted"><sup>1</sup> Fundación Instituto Leloir, Buenos Aires, Argentina · <sup>2</sup> Open Longevity, Sherman Oaks, CA, USA</p>
-  <p class="lead">Curating Open Genes means reading each article, its supplementary material and its figures to record every lifespan experiment in 51 structured fields. This pipeline automates that reading: a multimodal language model extracts and justifies each field, a vision model with code execution measures survival curves, and a code layer checks every quote against the document, applies the Open Genes guideline and abstains when a value has no evidence.</p>
-  <div class="cta">
-    <a class="btn primary" href="#poster">View the poster</a>
-    <a class="btn ghost" href="#pipeline">How the pipeline works</a>
-    <a class="btn ghost" href="https://opengenes.org" target="_blank" rel="noopener">opengenes.org ↗</a>
-  </div>
-  <div class="stats">
-    <div class="stat"><b>87.7%</b><span>fields matching Open Genes records, 20 articles</span></div>
-    <div class="stat"><b>51</b><span>fields per experiment, each with its evidence</span></div>
-    <div class="stat"><b>97%</b><span>curve readings within 5% of the reference</span></div>
-    <div class="stat"><b>~$5</b><span>API cost for 20 articles</span></div>
+  <p class="affil"><sup>1</sup> Fundación Instituto Leloir, Buenos Aires, Argentina · <sup>2</sup> Open Longevity, Sherman Oaks, CA, USA</p>
+
+  <div class="og">
+    <div>
+      <h2>Open Genes</h2>
+      <p>Manually curated database of genes associated with aging and lifespan. This pipeline reads an article, its supplementary material and its figures, and writes each lifespan experiment as an Open Genes record, with the evidence for every value.</p>
+      <p class="tag">Manual curation cannot keep pace with the literature.</p>
+    </div>
+    <div class="nums">
+      <div><b>1700</b><span>articles in Open Genes</span></div>
+      <div><b>51</b><span>fields per lifespan experiment</span></div>
+      <div><b>87.7%</b><span>fields matching Open Genes records, 20 articles</span></div>
+      <div><b>~$5</b><span>API cost for 20 articles</span></div>
+    </div>
   </div>
 </header>
 
 <main>
 
-<section id="poster" class="band">
+<section id="poster">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">The poster</div>
-      <h2>The work on one page</h2>
-      <p class="muted">The sections below expand what did not fit on it: what each record contains, every stage and subpipeline, how results are validated and the technology behind them.</p>
-    </div>
-    <div class="poster-frame">
+    <h2 class="h">The poster</h2>
+    <p class="intro">The sections below expand what did not fit on it: every stage and subpipeline, how results are validated and the technology behind them.</p>
+    <div class="poster">
       <a href="assets/poster.svg" target="_blank" rel="noopener"><img src="assets/poster.svg" alt="Poster: AI-Based Extraction of Structured Lifespan Data from Scientific Literature"
-           onerror="this.outerHTML='&lt;div class=&quot;poster-missing&quot;&gt;Poster coming soon (assets/poster.svg)&lt;/div&gt;'"></a>
+           onerror="this.outerHTML='&lt;div class=&quot;poster-missing&quot;&gt;Poster coming soon&lt;/div&gt;'"></a>
     </div>
-    <div class="poster-note muted">
-      <span>Click to open the poster at full size.</span>
-      <a href="assets/poster.svg" target="_blank" rel="noopener">Open full size ↗</a>
+    <div class="poster-links"><a href="assets/poster.svg" target="_blank" rel="noopener">Open the poster at full size</a></div>
+  </div>
+</section>
+
+<section id="pipeline" class="tint">
+  <div class="wrap">
+    <h2 class="h"><span class="n">1.</span> Extraction pipeline, step by step</h2>
+    <p class="intro">Code decides the order of the steps, how sources are combined and the final value of each field. The models have fixed roles and do not interact with each other: it is not a multi-agent system.</p>
+    <div class="legend"><span class="ai">AI model</span><span class="py">Python code</span><span class="io">Input / output</span></div>
+    <div class="flow">
+      <div class="row"><div class="box"><h4>Article PDF + supplementary</h4><p>The article is the main input; supplementary files come as docx, doc, pdf, xlsx or pptx.</p></div><div class="pill">Input</div></div>
+      <div class="row"><div class="box py"><h4>Preparation</h4><p>PDF text and OCR of figures, cohort-size mentions (“n = X”), and the supplementary reader: per-animal tables, methods, images.</p></div><div class="pill py">Python</div></div>
+      <div class="row"><div class="box ai"><h4>Experiment enumeration</h4><p>Lists every valid experiment–control pair under the Open Genes inclusion rules, and the figure that shows its curve.</p></div><div class="pill ai">Gemini 3.6 Flash</div></div>
+      <div class="row"><div class="box ai"><h4>Paper-level facts</h4><p>Organism, diet, housing, statistical method and the classification of each intervention, used as defaults for every experiment.</p></div><div class="pill ai">Gemini 3.6 Flash</div></div>
+      <div class="row"><div class="box ai"><h4>Survival-curve reading</h4><p>Measures lifespan at 90 / 50 / 10% survival by running Python on the figure image; also reads cohort size and sex.</p></div><div class="pill ai">GPT-6 Sol + code</div></div>
+      <div class="row"><div class="box ai"><h4>51 fields per experiment</h4><p>Value, verbatim quote with page, reasoning, rejected alternatives and confidence for every field; unanswered fields are asked again.</p></div><div class="pill ai">Gemini 3.6 Flash</div></div>
+      <div class="row"><div class="box py"><h4>Consolidation</h4><p>Merges sources by priority, verifies every quote in the document, applies guideline rules, recalculates % change, sets apart rows outside the criteria.</p></div><div class="pill py">Python</div></div>
+      <div class="row"><div class="box"><h4>Record per experiment</h4><p>One row per field with its evidence, plus a review spreadsheet for the curator and a trace of every model call.</p></div><div class="pill">Output</div></div>
+    </div>
+    <div class="notes">
+      <div class="note"><h4>Every value has a quote</h4><p>The model must cite the text behind each value, and code, not the model, searches for that quote in the document.</p></div>
+      <div class="note"><h4>Abstention</h4><p>In sensitive fields, a value without evidence is left as “not reported”; the discarded value and the reason are kept for audit.</p></div>
+      <div class="note"><h4>Guideline rules in code</h4><p>Open Genes conventions that can be written as rules are applied deterministically, not left to the model.</p></div>
     </div>
   </div>
 </section>
 
 <section id="record">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">Output</div>
-      <h2>Every value comes with its evidence</h2>
-      <p class="muted">One record per experiment. For each of the 51 fields the record stores much more than the value, so a curator can audit any decision.</p>
-    </div>
-    <div class="anatomy">
-      <div><b>Verbatim quote</b>The sentence of the document that supports the value, with page and section.</div>
-      <div><b>Reasoning and alternatives</b>Why the model chose the value, and the options it considered and rejected.</div>
-      <div><b>Declared confidence</b>High, medium or low. Medium and low are flagged for review.</div>
-      <div><b>Independent verification</b>Whether code found the quote in the document, and how.</div>
-      <div><b>Rule changes</b>Whether a guideline rule or a filter changed the value, keeping the original.</div>
-      <div><b>Provenance</b>Model, run and PDF fingerprint, following the W3C PROV model.</div>
-    </div>
-    <div class="table-scroll">
+    <h2 class="h"><span class="n">2.</span> What a record contains</h2>
+    <p class="intro">For each of the 51 fields, the record stores much more than the value, so a curator can audit any decision.</p>
+    <ul class="fields">
+      <li><b>Verbatim quote</b>with page and section</li>
+      <li><b>Reasoning and alternatives</b>why this value and not the others</li>
+      <li><b>Declared confidence</b>medium and low are flagged for review</li>
+      <li><b>Verification</b>whether code found the quote, and where</li>
+      <li><b>Rule changes</b>the original value, if a rule changed it</li>
+      <li><b>Provenance</b>model, run and PDF fingerprint (W3C PROV)</li>
+    </ul>
+    <div class="tbl">
       <table>
-        <thead><tr><th>Field</th><th>Value</th><th>Evidence</th><th>Where</th><th>Verified</th></tr></thead>
+        <thead><tr><th>Field</th><th>Value</th><th>Evidence (quote)</th><th>Where</th></tr></thead>
         <tbody>
-          <tr><td><code>interventionMethod</code></td><td>additional copies of a gene in the genome</td><td class="q">“we used a large intact genomic fragment (20.1 Kb) comprising the entire human G6PD gene”</td><td>p. 2, Results</td><td><span class="pill">in text</span></td></tr>
-          <tr><td><code>tissueSpecificPromoter</code></td><td>G6PD</td><td class="q">“overexpression of human G6PD under its endogenous promoter”</td><td>p. 1, Abstract</td><td><span class="pill">in text</span></td></tr>
-          <tr><td><code>organismLine</code></td><td>C57BL/6J</td><td class="q">“All the C57BL6 mice were purchased from Harlan Laboratories and correspond to the sub-strain C57BL6/J-OlaHsd.”</td><td>p. 6, Methods</td><td><span class="pill">in text</span></td></tr>
-          <tr><td><code>controlCohortSize</code></td><td>28</td><td class="q">“WT n=28”</td><td>p. 4, Figure 2a</td><td><span class="pill">in text</span></td></tr>
-          <tr><td><code>statMethod</code></td><td>log-rank</td><td class="q">“where logrank test was used”</td><td>p. 4, Figure 2 legend</td><td><span class="pill">in text</span></td></tr>
-          <tr><td><code>lifespanMaxControl</code></td><td>29.9 months</td><td class="q">Survival-curve reading at 10% survival, two readings ±0.2</td><td>Figure 2a</td><td><span class="pill">2 readings</span></td></tr>
+          <tr><td><code>interventionMethod</code></td><td>additional copies of a gene in the genome</td><td class="q">“we used a large intact genomic fragment (20.1 Kb) comprising the entire human G6PD gene”</td><td>p. 2, Results</td></tr>
+          <tr><td><code>tissueSpecificPromoter</code></td><td>G6PD</td><td class="q">“overexpression of human G6PD under its endogenous promoter”</td><td>p. 1, Abstract</td></tr>
+          <tr><td><code>organismLine</code></td><td>C57BL/6J</td><td class="q">“All the C57BL6 mice were purchased from Harlan Laboratories and correspond to the sub-strain C57BL6/J-OlaHsd.”</td><td>p. 6, Methods</td></tr>
+          <tr><td><code>controlCohortSize</code></td><td>28</td><td class="q">“WT n=28”</td><td>p. 4, Fig. 2a</td></tr>
+          <tr><td><code>statMethod</code></td><td>log-rank</td><td class="q">“where logrank test was used”</td><td>p. 4, Fig. 2 legend</td></tr>
+          <tr><td><code>lifespanMaxControl</code></td><td>29.9 months</td><td>curve reading at 10% survival, two readings ±0.2</td><td>Fig. 2a</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="muted" style="font-size:.85rem;margin-top:10px">Real record: overexpression of human G6PD in female mice (Nat Commun 2016, 10.1038/ncomms10894), run of 28 Oct 2026. All six values have high declared confidence.</p>
+    <p class="small">Real record: overexpression of human G6PD in female mice (Nat Commun 2016, 10.1038/ncomms10894), run of 28 Oct 2026. All six quotes were found in the document; all values have high confidence.</p>
   </div>
 </section>
 
-<section id="pipeline" class="band">
+<section id="subpipelines" class="tint">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">Architecture</div>
-      <h2>Five stages, a fixed sequence</h2>
-      <p class="muted">Code decides the order of the steps, how sources are combined and the final value of each field. The models have fixed roles and do not interact with each other: it is not a multi-agent system.</p>
-    </div>
-    <div class="legend"><span class="chip ai">AI model</span><span class="chip code">Python code</span><span class="chip io">Input / output</span></div>
-    <div class="stages">
-      <div class="stage">
-        <div class="n">Stage 1</div><h3>Inputs</h3>
-        <ul><li>Article PDF, the main input</li><li>Supplementary material: docx, doc, pdf, xlsx, pptx</li></ul>
-      </div>
-      <div class="stage code">
-        <div class="n">Stage 2 · code</div><h3>Preparation</h3>
-        <ul><li>PDF text and OCR of figures</li><li>“n = X” cohort-size mentions</li><li>Supplementary reader: tables, statistics, methods, images</li></ul>
-      </div>
-      <div class="stage ai">
-        <div class="n">Stage 3 · AI</div><h3>Extraction</h3>
-        <ul><li>Experiment enumeration</li><li>Paper-level facts</li><li>Survival-curve reading</li><li>51 fields per experiment</li></ul>
-      </div>
-      <div class="stage code">
-        <div class="n">Stage 4 · code</div><h3>Consolidation</h3>
-        <ul><li>Source merging</li><li>Quote verification</li><li>Open Genes rules and abstention</li><li>Row curation</li></ul>
-      </div>
-      <div class="stage">
-        <div class="n">Stage 5</div><h3>Outputs</h3>
-        <ul><li>Records with per-field evidence</li><li>Review spreadsheet for the curator</li><li>Traces and error diagnosis</li></ul>
-      </div>
-    </div>
-    <div class="grid-3" style="margin-top:22px">
-      <div class="card tint-ai"><h4>Multimodal</h4><p class="muted" style="margin:0">Text, tables and images. Curves are measured on the figure image; text inside figures is recovered by OCR to verify quotes.</p></div>
-      <div class="card tint-code"><h4>Verification and abstention</h4><p class="muted" style="margin:0">The model must quote its evidence, and code searches for that quote in the document. In sensitive fields, a value without verified evidence is left as “not reported”.</p></div>
-      <div class="card tint-code"><h4>Guideline rules in code</h4><p class="muted" style="margin:0">The Open Genes conventions that can be formalised are applied deterministically, not delegated to the model.</p></div>
-    </div>
-  </div>
-</section>
+    <h2 class="h"><span class="n">3.</span> Subpipelines</h2>
+    <p class="intro">The parts of the system that do the detailed work.</p>
 
-<section id="subpipelines">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">Subpipelines</div>
-      <h2>Inside each step</h2>
-    </div>
-
-    <!-- 1. Preparation -->
     <div class="sub">
-      <div class="sub-head"><span class="num">1</span><h3>Document preparation and supplementary reader</h3></div>
-      <p class="purpose">Before any model call, code prepares the article text and everything useful in the supplementary material. It runs locally, at no cost. The article PDF is passed to the models whole; its text and the OCR of its figures (Tesseract, 300 dpi) are used to verify quotes and to offer cohort-size candidates.</p>
+      <h3>Supplementary reader</h3>
+      <p class="lead">Before any model call, code prepares everything that can be prepared without AI. It runs locally, at no cost. The article PDF goes to the models whole; its text and the OCR of its figures are used to verify quotes and to offer cohort-size candidates.</p>
       <div class="lanes">
-        <div class="lane">
-          <h4>A · Per-animal tables</h4><div class="fmt">docx · xlsx · pptx</div>
-          <ol><li>Table with the age at death of each animal</li><li>Split by group: sex, genotype</li><li>Censored animals (alive at the end) excluded</li><li>Per group: n, mean, median, 10th percentile = minimum and 90th percentile = maximum lifespan</li></ol>
-        </div>
-        <div class="lane">
-          <h4>B · Other tables and text</h4><div class="fmt">all formats</div>
-          <ul><li>Summary tables passed on without recomputing</li><li>Incidence and count tables as text; primer tables and tables over 150 rows skipped</li><li>Methods section: genotyping, housing, statistical method</li><li>“n = X” mentions as candidates</li></ul>
-        </div>
-        <div class="lane">
-          <h4>C · Files for the model</h4><div class="fmt">pdf · docx</div>
-          <ul><li>Supplementary PDFs attached whole</li><li>Images inside Word files extracted and downscaled to 2048 px (e.g. tables pasted as images)</li><li>OCR of those images, used only to verify quotes</li></ul>
-        </div>
+        <div class="lane"><h4>A · Per-animal tables</h4><p class="fmt">docx · xlsx · pptx</p><ol><li>Age at death of each animal</li><li>Split by sex and genotype</li><li>Censored animals (alive at the end) excluded</li><li>Per group: n, mean, median, 10th percentile = minimum and 90th percentile = maximum lifespan</li></ol></div>
+        <div class="lane"><h4>B · Other tables and text</h4><p class="fmt">all formats</p><ul><li>Summary tables passed on as they are</li><li>Incidence and count tables as text; primer tables and tables over 150 rows skipped</li><li>Methods: genotyping, housing, statistical method</li><li>“n = X” mentions as candidates</li></ul></div>
+        <div class="lane"><h4>C · Files for the model</h4><p class="fmt">pdf · docx</p><ul><li>Supplementary PDFs attached whole</li><li>Images inside Word files (e.g. tables pasted as images) extracted and attached</li><li>OCR of those images, only to verify quotes</li></ul></div>
       </div>
-      <div class="merge-arrow">↓ ↓ ↓</div>
-      <div class="deliver">Delivered to every Gemini call: a context block with the instruction to verify each data point against the experiment, plus the attached files</div>
-      <div class="proof">
-        <div><code>path.5451</code><br>Values computed from the per-animal table match the 5 values a curator corrected by hand.</div>
-        <div><code>cell.2014.12.016</code><br>Excluding censored animals, the cohort size matches the reference: 39, against 42 without excluding them.</div>
-        <div><code>cmet.2013.07.013</code><br>Mean lifespan exists only in two tables pasted as images. With the images attached, 12 values went from missing to correct.</div>
+      <div class="into">All of it reaches every Gemini call: a context block with the instruction to check each data point against the experiment, plus the attached files.</div>
+      <div class="checks">
+        <div><code>path.5451</code> · values computed from the per-animal table match the 5 values a curator corrected by hand.</div>
+        <div><code>cell.2014.12.016</code> · excluding censored animals, the cohort size matches the reference: 39, not 42.</div>
+        <div><code>cmet.2013.07.013</code> · mean lifespan exists only in two tables pasted as images; with the images attached, 12 values went from missing to correct.</div>
       </div>
     </div>
 
-    <!-- 2. Gemini -->
     <div class="sub">
-      <div class="sub-head"><span class="num">2</span><h3>Extraction with Gemini: four calls</h3></div>
-      <p class="purpose">The article PDF and the supplementary material go to all four calls. Responses come as JSON; transient errors are retried up to three times, and an experiment that still fails is reported without stopping the rest of the article.</p>
-      <div class="calls">
-        <div>
-          <div class="call-title">Call 1 · Experiment enumeration <span>· temperature 0</span></div>
-          <div class="call"><div class="box in"><b>Receives</b>Open Genes inclusion rules: one intervention on the gene, a control without genetic modification, each sex, line or age is a separate experiment</div><div class="ar">→</div><div class="box model"><b>Gemini</b>Reads the whole article and identifies the valid comparisons</div><div class="ar">→</div><div class="box out"><b>Returns</b>The list of experiments and the curve figure of each, or the reason none is valid</div></div>
-        </div>
-        <div>
-          <div class="call-title">Call 2 · Paper-level facts <span>· once per article</span></div>
-          <div class="call"><div class="box in"><b>Receives</b>The fields that apply to the whole article</div><div class="ar">→</div><div class="box model"><b>Gemini</b>Looks for the general data in methods and results</div><div class="ar">→</div><div class="box out"><b>Returns</b>Organism, diet, temperature, density, statistical method, classification and expression change of each intervention</div></div>
-        </div>
-        <div>
-          <div class="call-title">Call 3 · Extraction <span>· one call per experiment</span></div>
-          <div class="call"><div class="box in"><b>Receives</b>The experiment, the paper-level facts, rules and vocabulary of the 51 fields, an example from another article with the same type of intervention, cohort-size candidates</div><div class="ar">→</div><div class="box model"><b>Gemini</b>Fills in the 51 fields of that experiment</div><div class="ar">→</div><div class="box out"><b>Returns, per field</b>Value, rejected alternatives and why, verbatim quote with page and section, reasoning, confidence, review flag</div></div>
-        </div>
-        <div>
-          <div class="call-title">Call 4 · Missing fields <span>· only when needed</span></div>
-          <div class="call"><div class="box in"><b>Receives</b>Only the fields call 3 left unanswered</div><div class="ar">→</div><div class="box model"><b>Gemini</b>Looks for those fields in the same format</div><div class="ar">→</div><div class="box out"><b>Returns</b>The missing fields with value, quote and confidence</div></div>
-        </div>
-      </div>
+      <h3>Extraction with Gemini: four calls</h3>
+      <p class="lead">The article PDF and the supplementary material go to all four calls. Transient errors are retried up to three times; an experiment that still fails is reported without stopping the rest of the article.</p>
+      <div class="call"><h4>1 · Experiment enumeration <span>· temperature 0</span></h4><div class="cols"><div><b>Receives</b>Inclusion rules: one intervention on the gene, a control without genetic modification, each sex, line or age is a separate experiment</div><div><b>Does</b>Reads the whole article and identifies the valid comparisons</div><div><b>Returns</b>The experiments and the curve figure of each, or the reason none is valid</div></div></div>
+      <div class="call"><h4>2 · Paper-level facts <span>· once per article</span></h4><div class="cols"><div><b>Receives</b>The fields that apply to the whole article</div><div><b>Does</b>Looks for the general data in methods and results</div><div><b>Returns</b>Organism, diet, temperature, density, statistical method, classification and expression change of each intervention</div></div></div>
+      <div class="call"><h4>3 · Extraction <span>· one call per experiment</span></h4><div class="cols"><div><b>Receives</b>The experiment, the paper-level facts, rules and vocabulary of the 51 fields, a solved example from another article with the same type of intervention, cohort-size candidates</div><div><b>Does</b>Fills in the 51 fields of that experiment</div><div><b>Returns, per field</b>Value, rejected alternatives and why, quote with page and section, reasoning, confidence, review flag</div></div></div>
+      <div class="call"><h4>4 · Missing fields <span>· only when needed</span></h4><div class="cols"><div><b>Receives</b>Only the fields call 3 left unanswered</div><div><b>Does</b>Looks for them in the same format</div><div><b>Returns</b>The missing fields with value, quote and confidence</div></div></div>
     </div>
 
-    <!-- 3. Curves -->
     <div class="sub">
-      <div class="sub-head"><span class="num">3</span><h3>Survival-curve reading with code execution</h3></div>
-      <p class="purpose">When an article does not report minimum, median or maximum lifespan in the text, they are measured on the figure. The vision model does not estimate by eye: it writes and runs Python on the image.</p>
-      <div class="curve-wrap">
-        <div class="curve-svg">
-          <svg viewBox="0 0 520 360" role="img" aria-label="Kaplan-Meier curves with the 90%, 50% and 10% survival crossings marked">
-            <g font-family="Inter, sans-serif" font-size="12" fill="#5a5f7a">
-              <line x1="60" y1="20" x2="60" y2="310" stroke="#c9cbe0"/>
-              <line x1="60" y1="310" x2="500" y2="310" stroke="#c9cbe0"/>
-              <text x="50" y="49" text-anchor="end">90%</text>
-              <text x="50" y="165" text-anchor="end">50%</text>
-              <text x="50" y="281" text-anchor="end">10%</text>
-              <text x="50" y="24" text-anchor="end">100%</text>
-              <line x1="60" y1="45" x2="500" y2="45" stroke="#9fa2c9" stroke-dasharray="4 5"/>
-              <line x1="60" y1="161" x2="500" y2="161" stroke="#9fa2c9" stroke-dasharray="4 5"/>
-              <line x1="60" y1="277" x2="500" y2="277" stroke="#e98a2e" stroke-dasharray="4 5"/>
-              <g text-anchor="middle"><text x="60" y="328">0</text><text x="170" y="328">10</text><text x="280" y="328">20</text><text x="390" y="328">30</text><text x="500" y="328">40</text></g>
-              <g fill="none" stroke="#e98a2e" stroke-width="1.6"><circle cx="170" cy="310" r="5"/><circle cx="280" cy="310" r="5"/><circle cx="390" cy="310" r="5"/><circle cx="500" cy="310" r="5"/></g>
-              <text x="280" y="350" text-anchor="middle">age, months · tick labels → pixel calibration</text>
-              <path d="M60 16 H200 V45 H232 V80 H262 V120 H286 V161 H312 V200 H340 V240 H366 V277 H392 V300 H420" fill="none" stroke="#7b7f95" stroke-width="2.4"/>
-              <path d="M60 16 H240 V45 H276 V80 H306 V120 H332 V161 H362 V200 H392 V240 H420 V277 H450 V300 H476" fill="none" stroke="#5b5fd6" stroke-width="2.4"/>
-              <g fill="#5b5fd6"><circle cx="240" cy="45" r="4.5"/><circle cx="332" cy="161" r="4.5"/><circle cx="420" cy="277" r="4.5"/></g>
-              <g fill="#7b7f95"><circle cx="200" cy="45" r="4.5"/><circle cx="286" cy="161" r="4.5"/><circle cx="366" cy="277" r="4.5"/></g>
-              <g font-size="11.5" font-weight="600"><text x="246" y="38" fill="#4446b8">minimum</text><text x="338" y="154" fill="#4446b8">median</text><text x="426" y="270" fill="#4446b8">maximum</text></g>
-              <g font-size="12"><line x1="78" y1="232" x2="98" y2="232" stroke="#7b7f95" stroke-width="2.4"/><text x="104" y="236">WT, n = 42</text><line x1="78" y1="254" x2="98" y2="254" stroke="#5b5fd6" stroke-width="2.4"/><text x="104" y="258" fill="#4446b8">KO, n = 38</text></g>
-            </g>
-          </svg>
-        </div>
-        <div class="blocks">
-          <div class="block code"><div class="b">1</div><div><h4>Locate the figure · code</h4><p>Finds the pages that mention survival and the figure number cited by enumeration, and renders them at 150 dpi. If several pages qualify, all are sent.</p></div></div>
-          <div class="block ai"><div class="b">2</div><div><h4>Measure · GPT with code interpreter</h4><p>Discards images without a chart, calibrates the axes from the pixel position of labelled ticks, identifies each group's curve from the legend, measures the crossings at 90%, 50% and 10% survival, and reads the time unit and the n of each group.</p></div></div>
-          <div class="block code"><div class="b">3</div><div><h4>Check · code</h4><p>Two independent readings. Each must keep minimum ≤ median ≤ maximum. The mean is accepted if the readings differ by 15% or less; otherwise the value is left for review. Cohort sizes must match exactly.</p></div></div>
-          <div class="block code"><div class="b">4</div><div><h4>Adjust · code</h4><p>If the axis is time since treatment, the starting age is added to express age since birth. Readings are cached, so a figure is never paid for twice.</p></div></div>
-          <div class="metric-row">
-            <div class="metric"><b>3.2%</b><span>mean error at 10% survival with code execution, against ~23% by eye</span></div>
-            <div class="metric"><b>97%</b><span>of values within 5% of the reference</span></div>
-          </div>
+      <h3>Reading survival curves</h3>
+      <p class="lead">When an article does not write minimum, median or maximum lifespan, they are measured on the figure. The vision model does not estimate by eye: it writes and runs Python on the image.</p>
+      <div class="curve">
+        <svg viewBox="0 0 500 330" role="img" aria-label="Survival curves with the 90%, 50% and 10% crossings marked">
+          <g font-family="Roboto, Arial, sans-serif" font-size="13" fill="#6a6c80">
+            <line x1="56" y1="14" x2="56" y2="284" stroke="#c9cbe0"/>
+            <line x1="56" y1="284" x2="486" y2="284" stroke="#34364a"/>
+            <text x="46" y="46" text-anchor="end">90%</text><text x="46" y="153" text-anchor="end">50%</text><text x="46" y="260" text-anchor="end">10%</text>
+            <line x1="56" y1="42" x2="486" y2="42" stroke="#7476d9" stroke-dasharray="5 5"/>
+            <line x1="56" y1="149" x2="486" y2="149" stroke="#7476d9" stroke-dasharray="5 5"/>
+            <line x1="56" y1="256" x2="486" y2="256" stroke="#f26b2a" stroke-dasharray="5 5"/>
+            <g text-anchor="middle"><text x="56" y="304">0</text><text x="163" y="304">10</text><text x="271" y="304">20</text><text x="378" y="304">30</text><text x="486" y="304">40</text></g>
+            <g fill="none" stroke="#f26b2a" stroke-width="1.6"><circle cx="56" cy="284" r="5"/><circle cx="163" cy="284" r="5"/><circle cx="271" cy="284" r="5"/><circle cx="378" cy="284" r="5"/><circle cx="486" cy="284" r="5"/></g>
+            <text x="271" y="324" text-anchor="middle">age, months (○ ticks → pixel calibration)</text>
+            <path d="M56 16 H190 V42 H220 V78 H246 V112 H268 V149 H292 V186 H318 V222 H344 V256 H370 V272 H396" fill="none" stroke="#7b7d8e" stroke-width="2.4"/>
+            <path d="M56 16 H232 V42 H264 V78 H292 V112 H316 V149 H344 V186 H372 V222 H398 V256 H426 V272 H452" fill="none" stroke="#5b5fd6" stroke-width="2.4"/>
+            <g font-size="13"><line x1="74" y1="214" x2="94" y2="214" stroke="#7b7d8e" stroke-width="2.4"/><text x="100" y="218">WT n = 42</text><line x1="74" y1="236" x2="94" y2="236" stroke="#5b5fd6" stroke-width="2.4"/><text x="100" y="240" fill="#5b5fd6">KO n = 38</text></g>
+          </g>
+        </svg>
+        <div>
+          <ol class="steps">
+            <li><span><b>Locate</b> · code finds the pages that mention survival and the figure cited by enumeration, and renders them as images.</span></li>
+            <li><span><b>Calibrate</b> · GPT finds the pixel position of the labelled ticks and builds the time scale.</span></li>
+            <li><span><b>Identify</b> · each group's curve, from the legend.</span></li>
+            <li><span><b>Measure</b> · where each curve crosses 90%, 50% and 10% survival: minimum, median and maximum lifespan.</span></li>
+            <li><span><b>Read</b> · the time unit, the n of each group and the sex.</span></li>
+            <li><span><b>Check</b> · two independent readings; each must keep minimum ≤ median ≤ maximum, and they must agree, or the value is left for review. Cohort sizes must match exactly.</span></li>
+          </ol>
+          <p style="margin:0;font-size:.95rem">If the axis is time since treatment, code adds the starting age to express age since birth. Readings are cached, so a figure is never paid for twice.</p>
+          <div class="callout"><b>97% of values within 5% of the reference</b>Mean error at 10% survival: 3.2% with code execution, against ~23% by eye.</div>
         </div>
       </div>
     </div>
 
-    <!-- 4. Consolidation -->
     <div class="sub">
-      <div class="sub-head"><span class="num">4</span><h3>Consolidation: from model answers to a final record</h3></div>
-      <p class="purpose">Code combines the outputs of the subpipelines and decides the final value of each field.</p>
-      <div class="steps">
-        <div class="step"><div><h4>Source priority</h4><p>For lifespan values and cohort sizes. A curve reading never replaces a value the article reports and that was verified.</p><div class="priority"><span>Text, table or legend</span><i>→</i><span>Per-animal data</span><i>→</i><span>Curve reading</span></div></div></div>
-        <div class="step"><div><h4>Quote verification</h4><p>Each quote is searched for in the PDF text, the supplementary text and the OCR of figures and images. The search tolerates the usual PDF problems: broken characters, interleaved two-column text, fragments joined with ellipses and one-character OCR errors.</p></div></div>
-        <div class="step"><div><h4>Open Genes guideline rules</h4><ul><li>Percent changes computed from the absolute values, not taken from the model</li><li>Kaplan-Meier is not recorded as a test; Mantel-Cox is recorded as log-rank</li><li>Fold changes converted to percent with the guideline's formula</li><li>Heterozygotes classified as knockout</li><li>Protein preferred when RNA was also measured</li></ul></div></div>
-        <div class="step"><div><h4>Abstention</h4><p>In sensitive fields (cohort sizes, lifespan values, expression, statistical method) a value without evidence becomes <code>nsp</code>. The discarded value and the reason are kept.</p></div></div>
-        <div class="step"><div><h4>Row curation</h4><p>Rows outside the Open Genes criteria are set apart with their reason: more than one intervention, a genetically modified control, a rescue or inactive construct, a duplicate control arm.</p></div></div>
-        <div class="step"><div><h4>Review flagging</h4><p>Fields with medium or low confidence and unstable curve readings are flagged for the curator. Values outside the allowed vocabulary are flagged as “new value”.</p></div></div>
-      </div>
+      <h3>Consolidation</h3>
+      <p class="lead">Code combines the outputs of the subpipelines and decides the final value of each field.</p>
+      <ol class="cons">
+        <li><div><h4>Source priority</h4><p>For lifespan values and cohort sizes. A curve reading never replaces a value the article writes and that was verified.</p><div class="prio"><span>Text, table or legend</span>→<span>Per-animal data</span>→<span>Curve reading</span></div></div></li>
+        <li><div><h4>Quote verification</h4><p>Each quote is searched for in the PDF text, the supplementary text and the OCR of figures and images, tolerating broken characters, two-column text, fragments joined with ellipses and one-letter OCR errors.</p></div></li>
+        <li><div><h4>Open Genes guideline rules</h4><ul><li>Percent changes computed from the absolute values</li><li>Kaplan-Meier is not recorded as a test; Mantel-Cox is recorded as log-rank</li><li>Fold changes converted to percent with the guideline's formula</li><li>Heterozygotes classified as knockout; protein preferred when RNA was also measured</li></ul></div></li>
+        <li><div><h4>Abstention</h4><p>In sensitive fields (cohort sizes, lifespan values, expression, statistical method) a value without evidence becomes <code>nsp</code>.</p></div></li>
+        <li><div><h4>Row curation</h4><p>Rows outside the Open Genes criteria are set apart with their reason: more than one intervention, a genetically modified control, a rescue or inactive construct, a duplicate control arm.</p></div></li>
+        <li><div><h4>Review flags</h4><p>Medium or low confidence, unstable curve readings and values outside the allowed vocabulary are flagged for the curator.</p></div></li>
+      </ol>
     </div>
 
-    <!-- 5. Origin -->
     <div class="sub">
-      <div class="sub-head"><span class="num">5</span><h3>Where each group of fields comes from</h3></div>
-      <div class="table-scroll">
+      <h3>Where each group of fields comes from</h3>
+      <div class="tbl">
         <table>
-          <thead><tr><th>Fields</th><th>Main source</th><th>Complementary sources</th><th>Rules in code</th></tr></thead>
+          <thead><tr><th>Fields</th><th>Main source</th><th>Also from</th><th>Rules in code</th></tr></thead>
           <tbody>
-            <tr><td>Gene, intervention, genotype</td><td>Gemini (text)</td><td>Paper-level facts</td><td>Heterozygote = knockout</td></tr>
-            <tr><td>Treatment</td><td>Gemini (text)</td><td>Supplementary methods</td><td>—</td></tr>
-            <tr><td>Gene expression</td><td>Gemini (text, figures)</td><td>Supplementary material</td><td>Fold change to %, protein preferred</td></tr>
-            <tr><td>Animals and conditions</td><td>Gemini (text)</td><td>Supplementary methods, “n = X” mentions</td><td>—</td></tr>
-            <tr><td>Minimum, median, maximum lifespan</td><td>Text or table</td><td>Per-animal data, curve reading (GPT)</td><td>Source priority, axis correction</td></tr>
-            <tr><td>Mean lifespan</td><td>Text or table</td><td>Per-animal data, supplementary image tables</td><td>—</td></tr>
+            <tr><td>Gene, intervention, genotype</td><td>Text (Gemini)</td><td>Paper-level facts</td><td>Heterozygote = knockout</td></tr>
+            <tr><td>Treatment</td><td>Text (Gemini)</td><td>Supplementary methods</td><td>—</td></tr>
+            <tr><td>Gene expression</td><td>Text, figures (Gemini)</td><td>Supplementary material</td><td>Fold change to %, protein preferred</td></tr>
+            <tr><td>Animals and housing</td><td>Text (Gemini)</td><td>Supplementary methods, “n = X”</td><td>—</td></tr>
+            <tr><td>Min, median, max lifespan</td><td>Text or table</td><td>Per-animal data, curve (GPT)</td><td>Source priority, axis correction</td></tr>
+            <tr><td>Mean lifespan</td><td>Text or table</td><td>Per-animal data, image tables</td><td>—</td></tr>
             <tr><td>Percent changes</td><td>Computed by code</td><td>—</td><td>From the absolute values</td></tr>
-            <tr><td>Cohort sizes</td><td>Text, legends</td><td>Supplementary material, figure (GPT)</td><td>Exact agreement between readings</td></tr>
-            <tr><td>Significance and statistical method</td><td>Gemini (text)</td><td>Supplementary methods</td><td>Method normalisation</td></tr>
-            <tr><td>Vital processes</td><td>Gemini (text)</td><td>—</td><td>—</td></tr>
+            <tr><td>Cohort sizes</td><td>Text, legends</td><td>Supplementary, figure (GPT)</td><td>Readings must agree</td></tr>
+            <tr><td>Significance, statistical test</td><td>Text (Gemini)</td><td>Supplementary methods</td><td>Test name normalised</td></tr>
+            <tr><td>Aging-related processes</td><td>Text (Gemini)</td><td>—</td><td>—</td></tr>
           </tbody>
         </table>
       </div>
@@ -519,126 +425,115 @@
   </div>
 </section>
 
-<section id="validation" class="band">
+<section id="validation">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">Validation</div>
-      <h2>Measured against curators, reviewed by curators</h2>
-      <p class="muted">Every run is compared with records curated by hand by the Open Genes team, and a curator reviews the disagreements. Each review feeds back into the pipeline and into the reference itself.</p>
-    </div>
+    <h2 class="h"><span class="n">4.</span> Validation</h2>
+    <p class="intro">Every run is compared with records curated by hand by the Open Genes team, and a curator reviews the disagreements. Each review corrects the pipeline and, when needed, the reference itself.</p>
     <div class="loop">
-      <div class="node io"><h4>Reference</h4>Open Genes curators read each article: 191 experiments, guideline and controlled vocabulary</div>
-      <div class="node code"><h4>Pipeline run</h4>20 articles, 47 reference experiments</div>
-      <div class="node code"><h4>Automatic evaluation</h4>Experiment matching, field comparison with tolerances, error diagnosis</div>
-      <div class="node io"><h4>Curator review</h4>Classifies every disagreement in the review spreadsheet</div>
-      <div class="node code"><h4>Corrections</h4>New rules and data sources in the pipeline; corrections to the guideline and the table</div>
+      <div><h4>Reference</h4>Curators read each article: 191 experiments, guideline and controlled vocabulary</div>
+      <div class="py"><h4>Pipeline run</h4>20 articles, 47 reference experiments</div>
+      <div class="py"><h4>Automatic evaluation</h4>Experiment matching, field comparison with tolerances, error diagnosis</div>
+      <div><h4>Curator review</h4>Every disagreement classified in the review spreadsheet</div>
+      <div class="py"><h4>Corrections</h4>New rules and data sources in the pipeline; fixes to the guideline and the table</div>
     </div>
-    <p class="loop-back">↺ The next run starts from the corrected pipeline and the corrected reference</p>
+    <p class="loop-back">The next run starts from the corrected pipeline and the corrected reference.</p>
 
-    <div class="grid-2" style="margin-top:26px">
-      <div class="card">
+    <div class="two">
+      <div>
         <h3>How fields are compared</h3>
         <ul>
           <li><b>Experiment matching</b> by optimal assignment (Hungarian algorithm), so nearly identical experiments (same line, different sex) are not crossed.</li>
           <li><b>Exact match</b> after normalising case, dashes and domain synonyms.</li>
-          <li><b>Open Genes tolerance</b>: 5% on lifespan values, 10% on percent changes in lifespan and expression.</li>
-          <li><b>List fields</b> (vital processes, statistical methods) also report partial agreement (Jaccard index).</li>
+          <li><b>Open Genes tolerance:</b> 5% on lifespan values, 10% on percent changes.</li>
+          <li><b>List fields</b> also report partial agreement (Jaccard index).</li>
         </ul>
       </div>
-      <div class="card">
+      <div>
         <h3>Automatic error diagnosis</h3>
-        <p class="muted">Every model call is traced: prompt, attached files, response, tokens and cost. At the end of a run, each disagreement is classified from those traces:</p>
-        <ol class="diag">
-          <li>Correct model value discarded by a pipeline filter</li>
-          <li>Curve-reading error, or figure not located</li>
-          <li>Percent change computed from values with errors</li>
-          <li>Value absent from all the text given to the model</li>
-          <li>Value in the text, different answer from the model</li>
-          <li>Judgement or list field</li>
+        <p style="margin:0 0 8px;font-size:.95rem">Every model call is traced: prompt, files, response, tokens and cost. Each disagreement is classified from those traces:</p>
+        <ol>
+          <li>a correct value discarded by a filter</li>
+          <li>curve-reading error, or figure not found</li>
+          <li>% change computed from values with errors</li>
+          <li>value absent from everything the model received</li>
+          <li>value in the text, different answer from the model</li>
+          <li>judgement or list field</li>
         </ol>
       </div>
     </div>
 
-    <div class="sec-head" style="margin-top:44px">
-      <h3 style="font-size:1.35rem">Models chosen by controlled comparison</h3>
-      <p class="muted">Each model was kept only if it improved its own task on the same articles.</p>
-    </div>
-    <div class="table-scroll">
-      <table>
-        <thead><tr><th>Role</th><th>Model</th><th>Why</th></tr></thead>
-        <tbody>
-          <tr><td>Extraction and justification</td><td>Gemini 3.6 Flash</td><td>+6–7 points of field accuracy over the previous model, 7 articles (27 Jul 2026)</td></tr>
-          <tr><td>Curve reading</td><td>GPT-6 Sol with Code Interpreter</td><td>97% of values within 5%, the same as the previous model at a quarter of the cost (26 Sep 2026)</td></tr>
-          <tr><td>Tested and not adopted</td><td>Gemini 4 Argon + GPT-6 Astra</td><td>84.2% against 87.7% on the same 20 articles, at 4.3 times the cost (2 Nov 2026)</td></tr>
-        </tbody>
-      </table>
+    <div class="sub">
+      <h3>Models chosen by controlled comparison</h3>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Role</th><th>Model</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>Extraction</td><td>Gemini 3.6 Flash</td><td>+6–7 points of field accuracy over the previous model, 7 articles (27 Jul 2026)</td></tr>
+            <tr><td>Curve reading</td><td>GPT-6 Sol + Code Interpreter</td><td>97% of values within 5%, as good as the previous model at a quarter of the cost (26 Sep 2026)</td></tr>
+            <tr><td>Tested, not adopted</td><td>Gemini 4 Argon + GPT-6 Astra</td><td>84.2% against 87.7% on the same 20 articles, at 4.3 times the cost (2 Nov 2026)</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </section>
 
-<section id="technology">
+<section id="technology" class="tint">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">Technology</div>
-      <h2>The stack, layer by layer</h2>
-      <p class="muted">In the order in which each layer takes part. Dashed outline: external service queried via API; everything else runs locally.</p>
-    </div>
+    <h2 class="h"><span class="n">5.</span> Technology</h2>
+    <p class="intro">In the order in which each layer takes part. Dashed outline: external service queried via API; everything else runs locally.</p>
     <div class="stack">
-      <div class="layer"><div class="name">Orchestration<small>Python 3.10</small></div><div class="tags"><span class="tag code">In-house orchestrator, fixed sequence per article</span><span class="tag code">Retries and backup API key</span><span class="tag code">Cost control per call and per run</span><span class="tag code">Cache of OCR and curve readings</span></div></div>
-      <div class="layer"><div class="name">Documents<small>local</small></div><div class="tags"><span class="tag">pdfplumber</span><span class="tag">Poppler pdftoppm</span><span class="tag">python-docx</span><span class="tag">python-pptx</span><span class="tag">openpyxl</span><span class="tag">antiword</span><span class="tag">Pillow</span></div></div>
-      <div class="layer"><div class="name">Artificial intelligence</div><div class="tags"><span class="tag ai ext">Gemini 3.6 Flash · Google API</span><span class="tag ai ext">GPT-6 Sol + Code Interpreter · OpenAI API</span><span class="tag ai">Tesseract 5.5 OCR · local</span></div></div>
-      <div class="layer"><div class="name">Deterministic logic<small>local</small></div><div class="tags"><span class="tag code">Pydantic schemas per experiment and decision</span><span class="tag code">Quote verification</span><span class="tag code">Guideline rules and row curation</span></div></div>
-      <div class="layer"><div class="name">Evaluation<small>local</small></div><div class="tags"><span class="tag code">Hungarian matching</span><span class="tag code">Tolerances and Jaccard</span><span class="tag code">Error diagnosis from traces</span></div></div>
-      <div class="layer"><div class="name">Outputs</div><div class="tags"><span class="tag">Records, JSON</span><span class="tag">Review spreadsheet, Excel</span><span class="tag">Run report</span><span class="tag">Traces of every call</span></div></div>
-      <div class="layer"><div class="name">Quality</div><div class="tags"><span class="tag">pytest, 300+ automated tests</span><span class="tag">Git</span></div></div>
+      <div class="layer"><b>Orchestration<small>Python 3.10</small></b><div class="chips"><span>In-house orchestrator, fixed sequence per article</span><span>Retries and backup API key</span><span>Cost control per call</span><span>Cache of OCR and curve readings</span></div></div>
+      <div class="layer"><b>Documents</b><div class="chips"><span>pdfplumber</span><span>Poppler</span><span>python-docx</span><span>python-pptx</span><span>openpyxl</span><span>antiword</span><span>Pillow</span></div></div>
+      <div class="layer"><b>AI models</b><div class="chips"><span class="ai ext">Gemini 3.6 Flash · Google API</span><span class="ai ext">GPT-6 Sol + Code Interpreter · OpenAI API</span><span class="ai">Tesseract 5.5 OCR · local</span></div></div>
+      <div class="layer"><b>Logic</b><div class="chips"><span>Pydantic schemas</span><span>Quote verification</span><span>Guideline rules</span><span>Row curation</span></div></div>
+      <div class="layer"><b>Evaluation</b><div class="chips"><span>Hungarian matching</span><span>Tolerances and Jaccard</span><span>Error diagnosis from traces</span></div></div>
+      <div class="layer"><b>Outputs</b><div class="chips"><span>Records (JSON)</span><span>Review spreadsheet (Excel)</span><span>Run report</span><span>Trace of every call</span></div></div>
+      <div class="layer"><b>Quality</b><div class="chips"><span>pytest, 300+ automated tests</span><span>Git</span></div></div>
     </div>
 
-    <div class="grid-2" style="margin-top:26px">
-      <div class="card">
+    <div class="two">
+      <div>
         <h3>Limitations</h3>
         <ul>
-          <li>Evaluated on 20 articles (47 experiments) and a single reference table, which also contains errors.</li>
-          <li>Some judgement fields (vital processes, significance of a specific metric) still lack a written Open Genes criterion.</li>
+          <li>Evaluated on 20 articles (47 experiments) and one reference table, which also has errors.</li>
+          <li>Some judgement fields (aging-related processes, significance of a specific metric) still lack a written Open Genes criterion.</li>
           <li>Figures inside supplementary PowerPoint files are not read yet.</li>
           <li>The models are commercial services; results vary by about one point between runs.</li>
         </ul>
       </div>
-      <div class="card">
+      <div>
         <h3>Next</h3>
         <ul>
           <li>Better reading of supplementary files, the main remaining gap.</li>
           <li>Validation on all 368 lifespan articles in Open Genes.</li>
           <li>Search and download of new articles.</li>
-          <li>A service that delivers records to the Open Genes curation workflow; open-source models run locally under evaluation.</li>
+          <li>Integration into the Open Genes curation workflow; open-source models run locally under evaluation.</li>
         </ul>
       </div>
     </div>
   </div>
 </section>
 
-<section id="references" class="band">
+<section id="references">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">References</div>
-      <h2>Open Genes</h2>
-    </div>
+    <h2 class="h"><span class="n">6.</span> References</h2>
     <div class="refs">
-      <div class="ref-main">
-        <div class="eyebrow">Database</div>
+      <div class="ref">
         <h3>Open Genes</h3>
-        <p>A manually curated database of human genes associated with aging and longevity: about 1,700 articles, 10,000 records and 35 parameters per lifespan experiment. This pipeline produces records in its format, following its curation guideline and controlled vocabulary.</p>
-        <a class="btn" href="https://opengenes.org" target="_blank" rel="noopener">Visit opengenes.org ↗</a>
+        <p>A manually curated database of human genes associated with aging and longevity. This pipeline produces records in its format, following its curation guideline and controlled vocabulary.</p>
+        <p><a href="https://opengenes.org" target="_blank" rel="noopener">opengenes.org</a></p>
       </div>
-      <div class="cite">
-        <div class="eyebrow">Cite Open Genes</div>
-        <p style="margin-top:8px">Rafikova E, Nemirovich-Danchenko N, et al. <b>Open Genes — a new comprehensive database of human genes associated with aging and longevity.</b> <em>Nucleic Acids Research</em>. 2024;52(D1):D950–D962.</p>
-        <p><a class="doi" href="https://doi.org/10.1093/nar/gkad712" target="_blank" rel="noopener">doi.org/10.1093/nar/gkad712 ↗</a></p>
+      <div class="ref">
+        <h3>Cite Open Genes</h3>
+        <p class="cite">Rafikova E, Nemirovich-Danchenko N, et al. Open Genes — a new comprehensive database of human genes associated with aging and longevity. <i>Nucleic Acids Research</i>. 2024;52(D1):D950–D962.</p>
+        <p><a href="https://doi.org/10.1093/nar/gkad712" target="_blank" rel="noopener">doi:10.1093/nar/gkad712</a></p>
       </div>
     </div>
     <div class="orgs">
-      <a class="org" href="https://www.leloir.org.ar" target="_blank" rel="noopener"><b>Fundación Instituto Leloir</b><span>Buenos Aires, Argentina</span><em>leloir.org.ar ↗</em></a>
-      <a class="org" href="https://openlongevity.org" target="_blank" rel="noopener"><b>Open Longevity</b><span>Sherman Oaks, CA, USA</span><em>openlongevity.org ↗</em></a>
-      <a class="org" href="https://opengenes.org" target="_blank" rel="noopener"><b>Open Genes</b><span>Aging and longevity gene database</span><em>opengenes.org ↗</em></a>
+      <a href="https://www.leloir.org.ar" target="_blank" rel="noopener">Fundación Instituto Leloir</a>
+      <a href="https://openlongevity.org" target="_blank" rel="noopener">Open Longevity</a>
+      <a href="https://opengenes.org" target="_blank" rel="noopener">Open Genes</a>
     </div>
   </div>
 </section>
@@ -648,9 +543,17 @@
 <footer>
   <div class="wrap">
     <span>AI-Based Extraction of Structured Lifespan Data from Scientific Literature · 2026</span>
-    <span>Fundación Instituto Leloir · Open Longevity · Open Genes</span>
+    <span>Fundación Instituto Leloir · Open Longevity</span>
   </div>
 </footer>
-
+<script>
+  // Copy each column header into its cells, for the one-card-per-row layout on phones.
+  document.querySelectorAll("table").forEach(function (table) {
+    var labels = Array.from(table.querySelectorAll("thead th")).map(function (th) { return th.textContent; });
+    table.querySelectorAll("tbody tr").forEach(function (tr) {
+      Array.from(tr.children).forEach(function (td, i) { td.setAttribute("data-label", labels[i] || ""); });
+    });
+  });
+</script>
 </body>
 </html>
