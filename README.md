@@ -2,7 +2,7 @@
 
 Landing page that accompanies the poster presentation: the poster itself, an expanded visual
 explanation of the extraction pipeline and its subpipelines, and references to
-[Open Genes](https://opengenes.org).
+[Open Genes](https://open-genes.com/).
 
 Static site, no build step: `index.html` at the repository root, assets in `assets/`. Deployed with
 Vercel.
